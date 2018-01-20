@@ -2,8 +2,15 @@
 // Lab 2 
 // Server
 
-#include <socket.h> 
+#include <sys/socket.h> 
 #include <stdio.h>
+#include <string.h>
+#include <netinet/in.h> // struct sockaddr_in
+#include <arpa/inet.h>
+#include <errno.h>
+#include <sys/types.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 enum {
     BUFFER_SIZE = 4
@@ -21,10 +28,10 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    output = fopen(argv[1], 'wb');
+    output = fopen(argv[1], "wb");
 
     // Initialize buffer and server address
-    memset(&serv_addr, '0', sizeof(serv_addr);
+    memset(&serv_addr, '0', sizeof(serv_addr));
     memset(buff, '0', sizeof(buff));
 
     // Family protocol
@@ -40,16 +47,13 @@ int main(int argc, char *argv[]) {
     listen(socket_ref, 10); // Socket, timeout 
 
     printf("\nListening!\n");
-
-    bool done = false;
-    while (!done) {
+    while (1) {
         accept_ref = accept(socket_ref, (struct sockaddr*) NULL, NULL);
         // While no errors
-        while ((read_ref = read(accept_ref, buff, sizeof(buff)) > 0) {
+        while ((read_ref = read(accept_ref, buff, sizeof(buff))) > 0) {
             fwrite(&buff, sizeof(buff), 1, output);
         }
-        // Done
-        done = true;
+        break;
     }
     fclose(output);
     close(socket_ref);

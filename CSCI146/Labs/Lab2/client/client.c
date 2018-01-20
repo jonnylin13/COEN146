@@ -2,8 +2,16 @@
 // Lab 2
 // Client 
 
-#include <sys/socket.h> // wut
+#include <sys/socket.h>
 #include <stdio.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <errno.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <string.h>
 
 enum {
     BUFFER_SIZE = 10
@@ -17,11 +25,11 @@ int main(int argc, char *argv[]) {
     FILE *source;
 
     if (argc != 3) {
-        printf("\nUsage: %s <ip of server> <file name>\n");
+        printf("\nUsage: %s <ip of server> <file name>\n", argv[0]);
         return 1;
     }
 
-    source = fopen(argv[2], 'rb');
+    source = fopen(argv[2], "rb");
 
     // Init memory
     memset(buff, '0', sizeof(buff));
