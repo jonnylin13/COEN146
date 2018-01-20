@@ -1,0 +1,120 @@
+Chapter 2
+many inputs, single output
+
+x = symbol for switch
+on = 1, off = 0
+
+SWITCH
+switch x controls the value of current that passes through
+
+AND
+x1 && x2 have to be on for current to pass through
+
+=D- AND gate
+as many inputs (all the inputs must be true to produce output)
+
+=Do- NAND gate
+logically equivalent to AND gate + NOT gate (inverter)
+
+=|>- OR gate
+as many inputs as you want 
+x1 || x2 || x3 ... have to be on for current to pass through
+
+=|>o- NOT gate (inverter)
+
+=||>- XOR gate
+one and only one input is true 
+(except when odd number of inputs, then all inputs true produces output true)
+
+XNOR is represented with =||>o-
+________
+x1 +o x2 = x1 'o x2
+
+x y | L
+-------
+0 0 | 0
+0 1 | 1
+1 0 | 1
+1 1 | 0
+
+number of inputs generated in truthtable is 2^inputs
+
+f = x3(x1 + x2)
+f = (x1 * x3) + (x2 * x3)
+
+Day 2 Lecture
+-------------
+
+Class example
+Pick a random truth truthtable
+
+x1 x2 | output
+--------------
+0  0  | 1
+0  1  | 1
+1  0  | 0
+1  1  | 1
+
+=> from that...
+            p1        p2        p3
+         __   __   __
+output = x1 * x2 + x1 * x2 + x1 * x2
+
+Requires 6 gates... can we reduce the function?
+                                    __
+- What do p1 and p2 have in common? x1
+__   __
+x1 ( x2 + x2 ) + x1 * x2
+
+Class example (half adder)
+
+a b | sum
+---------
+0 0 | 0
+0 1 | 1
+1 0 | 1
+1 1 | 0
+
+- This will use XOR
+
+a b | carryout
+--------------
+0 0 | 0
+0 1 | 0
+1 0 | 0
+1 1 | 1
+
+- This will use AND
+
+Half adder
+a------s0
+  |  |
+b------s1
+
+A full adder is a half adder with carryin input (extra dimension)
+
+De Morgan's Theorem
+-------------------
+      _____   _   _
+x y | x * y | x + y
+-------------------
+0 0 |   1   |   1
+0 1 |   1   |   1
+1 0 |   1   |   1
+1 1 |   0   |   0
+_____   _   _ 
+x * y = x + y
+
+Class example
+x1 x2 | f(x1, x2)
+-----------------
+0  0  | 1
+0  1  | 1
+1  0  | 0
+1  1  | 1   
+
+HW Due Wed before class (paper copy)
+(2.5, 2.15)
+
+
+

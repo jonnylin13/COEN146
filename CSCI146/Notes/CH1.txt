@@ -1,0 +1,59 @@
+Home network -> Access ISPs -> Regional ISPs 
+or IXPs -> Tier 1 ISP or Big Companies
+
+4 sources of packet delay
+d = d_processing + d_queueing + d_transmission_delay + d_propagation
+
+transmission delay = packet length / link bandwidth
+propagation delay = length of physical link / propagation speed (thru medium)
+
+Caravan encounters two toll booths analogy
+------------------
+car speed is propagation speed (speed thru medium)
+rate at which toll booth services cars (transmission rate)
+
+R: link bandwidth (bps)
+L: packet lenth (bits)
+a: average packet arrival rate
+
+aL: # of bits arriving per second
+R: # of bits transisting per secondt
+
+aL = R
+NO queueing delay
+
+Queueing delay is when a packet is received by the router, it must
+queue because the transmission buffer is full and it cannot be sent 
+
+Queue (aka buffer) has finite capacity
+If you send a packet to a full queue, the packet is dropped
+Lost packet may be retransmitted by protocol
+
+Throughput: number of bits delivered over time 
+* instantaneous: rate at given point in time
+* average: rate over period of time
+
+Network layering = breaking down complexity into protocol (series of steps)
+Modularization keeps things easy to maintain
+Sometimes cross-layer implementations can be difficult
+
+Internet protocol stack (5 layers)
+----------------------------------
+application: supporting network applications (HTTP, FTP, SMTP)
+transport: process-process data transfer (TCP, UDP)
+network: routing datagrams from source to destination (IP, routing protocols)
+* computer-computer (doesn't care about network, etc)
+link: data transfer between neighboring networks (Ethernet, 802.111, PPP)
+physical: bits "on the wire"
+* bit transmission, bit travel, etc
+
+application
+-----------
+* presentation: allow applications to interpret data
+e.g. encryption, compression, machine-specific conventions
+* session: synchronization, checkpointing, recovery of data exchange
+
+application - message
+transport - segment (transport header)
+network - packet (with a packet header)
+link - frame
