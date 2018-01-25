@@ -1,0 +1,113 @@
+Chapter 2 Stuff
+
+Review Chapter 2 Outine slides
+2.1 principles of network application
+2.2 web and http
+and socket programming!!!
+
+Later, we will talk about
+2.3 electronic mail
+and other stuff like video, etc...
+
+TODAY: DNS - domain name system
+people: many identifiers:
+* SSN, name, passport #, etc
+internet hosts, routers:
+* IP Address (32 bit) - used for addressing datagrams
+* "name", e.g. www.yahoo.com - used by humans to point to the IP Address
+
+The DNS...
+1. is a distributed database, implemented in a hierarchy of many name servers
+2. uses application layer protocol: hosts, name servers communicate to resolve names (address/name translation)
+3. uses UDP (no connection setup ahead, doesn't want to keep the connection) means no flow control/minimal error recovery/congestion control
+- the reliability can be programmed into the application layer (send another request after a failed request)
+
+DNS services
+- hostname to IP address translation
+- host aliasing
+- mail server aliasing
+- load distribution
+    * replicated web servers: many IP addresses correspond to one name
+
+Why not centralize DNS?
+- single point of failure
+- traffic volume
+- distant centralized database
+
+DNS: a distributed, hierarchical database
+
+                Root DNS
+                /  |  \
+             com  org  edu
+             / \         \
+        Google  Amazon    SCU
+
+Root name servers can only be connected by local name servers
+(Local name servers act as proxies, cache name mapping) Proxies act as loading caches between client and server
+
+Host -> local DNS -> root DNS (which knows all the top level domains, not the mappings)
+The root DNS returns the TLD DNS Server, which returns the authoritative DNS server, which has the mapping for the IP from hostname
+
+Once any name learns the mapping of a webpage, it gets cached
+* Cached entries timeout (disappear) after some time (TTL)
+* TLD servers typically cache in local naem servers (therefore root name servers are rarely visited)
+* Cached entries may be out-of-date, so if host changes IP, may not be known Internet-wide until all TTLs expire
+
+DNS records
+(Resource record format): (name, value, type, ttl)
+
+type=A
+name is hostname
+value is IP
+
+type=CNAME
+name is alias name for some "canonical" (the real) name
+value is canonical name
+
+type=NS
+name is domain (e.g. foo.com)
+value is hostname of authoritative name server for this domain
+
+type=MX
+value is name of mailserver associated with name
+
+DNS attacks
+* Most local DNS servers will bypass traffic from root server, so root level DDoS attacks are usually unsuccessful
+TLD servers are potentially more dangerous (does have info about authoritative servers)
+* DNS poisoning, sending fake replies to DNS server, which caches
+
+DNS message protocol
+* query and reply messages, both with the same message format
+[ id ][ flags ][ # of questions ][ ... ]
+
+End of Chapter 2...
+
+Chapter 3 Transport layer
+1 basic job for the transport layer to multiplex an demultiplex
+Will take information from the application layer and process to lower level
+
+- Provides logical communication between processes on different hosts
+send: breaks app messages into segments, passes to network layer
+rcv: reassembles segments into messages, passes to app layer
+
+* More than one transport protocol available to apps
+Internet: TCP and UDP
+
+network layer: logical communication betwen hosts (computer to computer)
+transport layer: logical communication between processes (process to process)
+
+reliable, in order delivery (TCP)
+- congestion control
+- flow control
+- connection setup
+
+unreliable, unordered delivery (UDP)
+- no-frills extension of "best-effort" IP
+- if sending multiple messages, the second message may reach the end destination before the first
+- no delay guarantees or bandwidth guarantees
+
+Multiplexing
+- handle data from multiple sockets, add transport header (later used for demultiplexing)
+
+Demultiplexing
+- host receives IP datagrams, uses IP addresses & port numbers to direct segment to appropriate socket

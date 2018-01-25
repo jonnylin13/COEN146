@@ -1,0 +1,40 @@
+Chapter 3
+
+Half Adder
+0  0   1   1
+0  1   0   1
+-  -   -   -
+00 01  01 10
+
+inputs a, b
+outputs c, s
+
+Two outputs, Carryout and Sum
+s = a XOR b
+c = a AND b
+
+full adder takes cout from half adder as input (cin)
+a | b | cin | s | cout
+-----------------------
+0 | 0 |  0  | 0 |  0
+0 | 1 |  0  | 1 |  0
+1 | 0 |  0  | 1 |  0
+1 | 1 |  0  | 0 |  1
+-----------------------
+0 | 0 |  1  | 1 |  0
+0 | 1 |  1  | 0 |  1
+1 | 0 |  1  | 0 |  1
+1 | 1 |  1  | 1 |  1
+
+
+sum = s = !cin(a XOR b) + cin(a XNOR b)
+ = cin XOR (a XOR b)
+= a XOR b XOR c
+       
+             p1        p2       p3      p4
+cout = c = ab!cin + bcin!a + acin!b + abcin
+
+a \ b cin
+    00  01  11  10
+  0          1
+  1      1   1   1
