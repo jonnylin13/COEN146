@@ -43,8 +43,19 @@ int main(int argc, char *argv[]) {
 
     while (1) {
         // Listening!
+        // Recv
+        // If checksum is corrupt or SEQ1, send an ACK1 back
+        // Else if not corrupt and SEQ0
+        // Extract data
+        // Compute checksum for ACK0
+        // Send ACK0
 
-        // Recv communication
+        // Recv
+        // If checksum is corrupt or SEQ0, resend ACK0
+        // Else if not corrupt and SEQ1
+        // Extract data
+        // Compute checksum for ACK1
+        // Send ACK1
     }
 
     return 0;
