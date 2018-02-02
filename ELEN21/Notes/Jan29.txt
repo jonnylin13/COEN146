@@ -1,0 +1,18 @@
+A + B!A = A + B
+A + AB = A
+
+A XOR 0 = A1 + !A0 = A
+A XOR 1 = A0 + !A1 = !A 
+
+    1110
+  x 1011
+    -----
+    1110
+   1110
+  0000
+ 1110
+ --------
+ 10011010
+
+Multiplication is just iterations of addition and shifting
+

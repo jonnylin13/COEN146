@@ -30,3 +30,4 @@ battle sweat = blood
 - honor is a value which permeats the civilization of the West throughout 
 ancient, medieval, and early modern periods
 - heroism, shame, the importance of elite group memberships
+- you can't be honorable or dishonorable on a deserted island
