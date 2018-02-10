@@ -7,14 +7,17 @@
 #include <netinet/in.h>
 #include <string.h>
 #include <stdlib.h>
+#include "useful.h"
 
 int main(int argc, char *argv[]) {
-    int socketRef, nBytes;
     char buffer[1024];
+    int socketRef, nBytes;
     struct sockaddr_in serverAddress, clientAddress;
-    struct socketAddressStorage, serverAddressStorage;
+    struct sockaddr_storage serverAddressStorage;
     socklen_t addressSize, clientAddressSize;
-    int i;
+    int cursor = 0;
+    int sequence = 0;
+    FILE* output;
 
     if (argc != 2) {
         printf("Error: requires port number\n");
@@ -41,22 +44,76 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+    int fileNameSize = 0;
+    int fileDone = 0;
+    int transferDone = 0;
+
     while (1) {
         // Listening!
         // Recv
-        // If checksum is corrupt or SEQ1, send an ACK1 back
-        // Else if not corrupt and SEQ0
-        // Extract data
-        // Compute checksum for ACK0
-        // Send ACK0
+        PACKET recvPacket;
+        nBytes = recvfrom(socketRef, &recvPacket, (sizeof(int) * 2) + 18, 0, (struct sockaddr *) &serverAddressStorage, &addressSize);
+        printf("\nReceived sequence: %d\n", recvPacket.header.seq_ack[3] - 48);
+        printf("Expected sequence: %d\n", sequence);
 
-        // Recv
-        // If checksum is corrupt or SEQ0, resend ACK0
-        // Else if not corrupt and SEQ1
-        // Extract data
-        // Compute checksum for ACK1
-        // Send ACK1
+        int isCorrupt = corrupt(recvPacket, sequence);
+
+        if (isCorrupt == 1) {
+            // Send an ACK_!sequence
+            int not_sequence = 1 > sequence ? 1 : 0;
+            PACKET ack = create_ack(not_sequence);
+            printf("\nSending resend request ACK%d!\n", not_sequence);
+            sendPacketS2C(ack, socketRef, serverAddressStorage, addressSize);
+        } else if (isCorrupt == 0) {
+            // Else if not corrupt and SEQ_sequence
+            // Extract data
+            // Send ACK_sequence
+            // Increment state
+            printf("Received message: ");
+            for (int i = 0; i < recvPacket.header.length; i++) {
+                printf("%d ", recvPacket.data[i]);
+                buffer[cursor] = recvPacket.data[i];
+                cursor += 1;
+            }
+            printf("\n");
+            if (fileDone == 0) {
+                if (recvPacket.data[recvPacket.header.length - 2] == '|') {
+                    fileDone = 1; 
+                    fileNameSize += recvPacket.header.length - 2;
+                    printf("\nReceived file name\n");
+                    printf("File name size: %d\n", fileNameSize);
+                } else {
+                    fileNameSize += recvPacket.header.length;
+                }
+            }   
+            if (recvPacket.header.length == -1) {
+                break;
+            } else {    
+                PACKET ack = create_ack(sequence);
+                printf("\nSending ACK%d!\n", sequence);
+                sendPacketS2C(ack, socketRef, serverAddressStorage, addressSize);
+                sequence = 1 > sequence ? 1 : 0;
+            }
+        }
+
     }
 
+    printf("Done!\n");
+
+    buffer[cursor] = '\0';
+    char fileName[fileNameSize + 1];
+    memcpy(fileName, &buffer, fileNameSize);
+    fileName[fileNameSize] = '\0';
+
+    printf("\nFilename: %s\n", fileName);
+    printf("\nMessage: ");
+    output = fopen(fileName, "wb");
+    for (int i = fileNameSize + 1; i < cursor; i++) {
+        printf("%c", buffer[i]);
+        if(buffer[i] == '\0') continue;
+        fwrite(&buffer[i], sizeof(char), 1, output);
+    }
+    fclose(output);
+    printf("\n");
     return 0;
 }

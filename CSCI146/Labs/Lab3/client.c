@@ -4,20 +4,88 @@
 // Should randomize checksum
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 #include <string.h>
-#include <useful.h>
+#include "useful.h"
+#include <time.h>
+
+void sendData(char data[], int len, int socket, struct sockaddr_in address, socklen_t addressLength, int end) {
+
+    int cursor = 0;
+    int nBytes;
+    int sequence = 0;
+
+    // Start a main loop (while there is still data to be sent) - track this with a cursor variable
+    while (cursor < len) { // cursor != eof
+
+        int not_sequence = 1 > sequence ? 1 : 0;
+        int remainingBytes = len - cursor;
+        int bufferSize = 10;
+        if (bufferSize > remainingBytes) {
+            bufferSize = remainingBytes;
+        }
+        // Compute checksum
+        // Construct packet with header, data, checksum
+        char _data[bufferSize];
+        for (int i = 0; i < bufferSize; i++) {
+            _data[i] = data[cursor+i];
+        }
+
+        // Send seq packet with data
+        PACKET packet = create_seq(sequence, _data, bufferSize);
+        sendPacketC2S(packet, socket, address, addressLength);
+        
+
+        // Receive packet
+        PACKET recvPacket;
+        printf("Expected sequence: %d\n", sequence);
+        nBytes = recvfrom(socket, &recvPacket, (sizeof(int) * 2) + 18, 0, NULL, NULL);
+        printf("Received sequence: %d\n", recvPacket.header.seq_ack[3] - 48);
+
+        // Is the packet corrupt? Wrong sequence or checksum
+        int isCorrupt = corrupt(recvPacket, sequence);
+
+        if (isCorrupt == 0) {
+            printf("\nReceived correct ACK! Continuing...\n");
+
+            // Update sequence and cursor
+            sequence = 1 > sequence ? 1 : 0;
+            cursor += bufferSize;
+        } else if (isCorrupt == 1) {
+            printf("\nReceived incorrect ACK! Re-sending previous message!\n");
+            // Wrong ACK, do nothing to re-send the same seq packet
+        }
+        
+
+    }
+
+    if (end == 1) {
+        sendPacketC2S(create_seq_goodbye(sequence), socket, address, addressLength);
+    }
+
+    printf("Done!\n");
+}
 
 int main(int argc, char *argv[]) {
-    int socketRef, port, nBytes;
+
+    int socketRef, port;
     struct sockaddr_in serverAddress;
     socklen_t addressSize;
+    FILE *inputFile;
 
-    if (argc != 3) {
-        printf("Error: need port number and machine\n");
+    if (argc != 5) {
+        printf("Usage: %s <port> <ip> <input file> <output file>\n", argv[0]);
         return 1;
     }
+
+    srand(time(NULL));
+
+    inputFile = fopen(argv[3], "rb");
+    char *outputFile = argv[4];
+    strcat(outputFile, "|\0");
 
     // Configure server address
     serverAddress.sin_family = AF_INET;
@@ -27,67 +95,23 @@ int main(int argc, char *argv[]) {
 
     // Create socket
     socketRef = socket(PF_INET, SOCK_DGRAM, 0);
+    sendData(outputFile, strlen(outputFile) + 1, socketRef, serverAddress, addressSize, 0);
 
+    fseek(inputFile, 0, SEEK_END);
+    int fileSize = ftell(inputFile);
+    rewind(inputFile);
+    printf("\nFile size: %d\n", fileSize);
+    char data[fileSize + 1];
+    int comp = fread(&data, 1, fileSize, inputFile);
+    data[fileSize] = '\0';
+    printf("\nSending data: ");
+    for (int i = 0; i < fileSize; i++) {
+        printf("%d ", data[i]);
+    }
+    printf("\n");
+    fclose(inputFile);
+    sendData(data, fileSize, socketRef, serverAddress, addressSize, 1);
 
     return 0;
 }
 
-char* sendPacket(struct PACKET packet, int socket, struct sockaddr address, sockle_t addressLength) {
-    int packetSize = 96 + packet.header.length; // Header length + length of data
-    // Copy all the bits into char buffer
-    char *buffer[packetSize];
-
-    memcpy(buffer, packet.header.seq_ack, sizeof(int));
-    memcpy(buffer+sizeof(int), packet.header.length, sizeof(int));
-    memcpy(buffer+64, packet.header.checksum, sizeof(int));
-    memcpy(buffer+96, packet.data, sizeof(char) * 10);
-
-    sendto(socket, );
-}
-
-void sendData(char data[], int len, int socket, struct sockaddr address, socklen_t addressLength) {
-    int cursor = 0;
-    while (cursor != len) { // cursor != eof
-
-        int remainingBits = len - cursor;
-        int bufferSize = 10;
-        if (bufferSize > remainingBits) {
-            bufferSize = remainingBits;
-        }
-
-        struct HEADER initHeader;
-        struct PACKET initPacket;
-        initHeader.seq_ack = atoi("SEQ0");
-        initHeader.length  = bufferSize;
-
-        int checksum = initHeader.seq_ack ^ initHeader.length;
-        char[bufferSize] data;
-        for (int i = 0; i < bufferSize; i++) {
-            checksum ^= data[cursor+i];
-            data[i] = data[cursor+i];
-        }
-        initHeader.checksum = checksum;
-        initPacket.header = initHeader;
-        initPacket.data = data;
-
-        
-
-    }
-    // Start a main loop (while there is still data to be sent) - track this with a cursor variable
-    // Create packet
-    // Header includes seq_ack, len (of data), and cksum
-    // Compute checksum
-    // Construct packet with header, data, checksum
-    // Send the initial packet with SEQ0
-
-    // Recv response
-    // Start another loop here so we can keep resending the second packet if it fails
-    // If checksum is wrong or returns with ACK1, resend initial packet (continue)
-    // Else if checksum is correct and ACK0, proceed...
-    // Compute checksum for second chunk of data
-    // Construct header with SEQ1
-    // Send the packet
-    // Recv response
-    // If checksum is wrong or returns with ACK0, resend previous packet (continue)
-    // Else if checksum is correct and ACK1, proceed... (break out of the nested loop back into main loop)
-}
