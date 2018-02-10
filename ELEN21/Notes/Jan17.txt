@@ -1,7 +1,0 @@
-SOP = Sum of Product
-f = AB + CD + EF
-
-
-POS = Product of Sum
-fpos = (A + B) * (C + D) * (E + F)
-(OR - AND) configuration
