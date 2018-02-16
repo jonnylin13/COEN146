@@ -79,10 +79,10 @@ PACKET create_ack_goodbye(int sequence) {
 void sendPacketC2S(PACKET packet, int socket, struct sockaddr_in address, socklen_t addressLength) {
     int packetSize = (sizeof(int) * 2) + 18;
     int random = rand() % 101;
-    if (random <= 40 && packet.header.length != -1) {
+    if (random <= 20 && packet.header.length != -1) {
         printf("RNG: %d\n", random);
         packet.header.checksum = 0;
-        printf("Sending faulty packet!!!\n");
+        printf("Sending faulty packet!\n");
     }
     printf("Sent message: ");
     for (int i = 0; i < packet.header.length; i++) {
@@ -96,6 +96,12 @@ void sendPacketC2S(PACKET packet, int socket, struct sockaddr_in address, sockle
 void sendPacketS2C(PACKET packet, int socket, struct sockaddr_storage address, socklen_t addressLength) {
     int packetSize = (sizeof(int) * 2) + 18;
     printf("Sending checksum: %d\n", packet.header.checksum);
+    int random = rand() % 101;
+        printf("RNG: %d\n", random);
+    if (random <= 25) {
+        printf("Packet was not sent!\n");
+        return;
+    }
     sendto(socket, &packet, packetSize, 0, (struct sockaddr*) &address, addressLength);
 }
 

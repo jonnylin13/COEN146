@@ -11,8 +11,10 @@
 #include <string.h>
 #include "useful.h"
 #include <time.h>
+#include <unistd.h>
+#include <fcntl.h>
 
-void sendData(char data[], int len, int socket, struct sockaddr_in address, socklen_t addressLength, struct timeval, tv, fd_set readfds, int end) {
+void sendData(char data[], int len, int socket, struct sockaddr_in address, socklen_t addressLength, int rv, struct timeval tv, fd_set readfds, int end) {
 
     int cursor = 0;
     int nBytes;
@@ -38,13 +40,13 @@ void sendData(char data[], int len, int socket, struct sockaddr_in address, sock
         // Send seq packet with data
         PACKET packet = create_seq(sequence, _data, bufferSize);
         sendPacketC2S(packet, socket, address, addressLength);
-
+        
         // Select timer
-        rv = select(socketRef + 1, &readfds, NULL, NULL, &tv);
+        rv = select(socket + 1, &readfds, NULL, NULL, &tv);
         if (rv == 0) {
           // Timeout
           resent++;
-          if (resent == 3) {
+          if (resent == 5) {
             printf("Error: too many resend attempts, quitting");
             return;
           }
@@ -116,11 +118,11 @@ int main(int argc, char *argv[]) {
     // Create socket
     socketRef = socket(PF_INET, SOCK_DGRAM, 0);
     fcntl(socketRef, F_SETFL, O_NONBLOCK);
-    FD_ZERO($readfds);
+    FD_ZERO(&readfds);
     FD_SET(socketRef, &readfds);
-    tv.tv_sec = 10;
+    tv.tv_sec = 5;
     tv.tv_usec = 0;
-    sendData(outputFile, strlen(outputFile) + 1, socketRef, serverAddress, addressSize, tv, readfds, 0);
+    sendData(outputFile, strlen(outputFile) + 1, socketRef, serverAddress, addressSize, rv, tv, readfds, 0);
 
     fseek(inputFile, 0, SEEK_END);
     int fileSize = ftell(inputFile);
@@ -135,7 +137,7 @@ int main(int argc, char *argv[]) {
     }
     printf("\n");
     fclose(inputFile);
-    sendData(data, fileSize, socketRef, serverAddress, addressSize, tv, readfds, 1);
+    sendData(data, fileSize, socketRef, serverAddress, addressSize, rv, tv, readfds, 1);
 
     return 0;
 }

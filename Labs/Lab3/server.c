@@ -57,6 +57,7 @@ int main(int argc, char *argv[]) {
         printf("Expected sequence: %d\n", sequence);
 
         int isCorrupt = corrupt(recvPacket, sequence);
+        int justFileDone = 0;
 
         if (isCorrupt == 1) {
             // Send an ACK_!sequence
@@ -79,6 +80,7 @@ int main(int argc, char *argv[]) {
             if (fileDone == 0) {
                 if (recvPacket.data[recvPacket.header.length - 2] == '|') {
                     fileDone = 1; 
+                    justFileDone = 1;
                     fileNameSize += recvPacket.header.length - 2;
                     printf("\nReceived file name\n");
                     printf("File name size: %d\n", fileNameSize);
@@ -93,6 +95,9 @@ int main(int argc, char *argv[]) {
                 printf("\nSending ACK%d!\n", sequence);
                 sendPacketS2C(ack, socketRef, serverAddressStorage, addressSize);
                 sequence = 1 > sequence ? 1 : 0;
+                if (justFileDone == 1) {
+                    sequence = 0;
+                }
             }
         }
 
