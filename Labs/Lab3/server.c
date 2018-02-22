@@ -10,7 +10,7 @@
 #include "useful.h"
 
 int main(int argc, char *argv[]) {
-    char buffer[1024];
+    char buffer[102400];
     int socketRef, nBytes;
     struct sockaddr_in serverAddress, clientAddress;
     struct sockaddr_storage serverAddressStorage;

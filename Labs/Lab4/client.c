@@ -14,12 +14,17 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-void sendData(char data[], int len, int socket, struct sockaddr_in address, socklen_t addressLength, int rv, struct timeval tv, fd_set readfds, int end) {
+void sendData(char data[], int len, int socket, struct sockaddr_in address, socklen_t addressLength, int end) {
 
     int cursor = 0;
     int nBytes;
     int sequence = 0;
     int resent = 0;
+
+    // Set up timer
+    struct timeval tv;
+    int rv;
+    fd_set readfds;
 
     // Start a main loop (while there is still data to be sent) - track this with a cursor variable
     while (cursor < len) { // cursor != eof
@@ -40,16 +45,24 @@ void sendData(char data[], int len, int socket, struct sockaddr_in address, sock
         // Send seq packet with data
         PACKET packet = create_seq(sequence, _data, bufferSize);
         sendPacketC2S(packet, socket, address, addressLength);
-        
+        if (resent == 5) {
+          printf("Error: too many resend attempts, quitting\n");
+          return;
+        }
+
         // Select timer
+
+        fcntl(socket, F_SETFL, O_NONBLOCK);
+        FD_ZERO(&readfds);
+        FD_SET(socket, &readfds);
+        tv.tv_sec = 2;
+        tv.tv_usec = 0;
+
         rv = select(socket + 1, &readfds, NULL, NULL, &tv);
         if (rv == 0) {
           // Timeout
           resent++;
-          if (resent == 5) {
-            printf("Error: too many resend attempts, quitting");
-            return;
-          }
+
           continue;
         } else if (rv == 1) {
           // Receive data
@@ -73,6 +86,7 @@ void sendData(char data[], int len, int socket, struct sockaddr_in address, sock
           } else if (isCorrupt == 1) {
               printf("\nReceived incorrect ACK! Re-sending previous message!\n");
               // Wrong ACK, do nothing to re-send the same seq packet
+              continue;
           }
         }
 
@@ -93,11 +107,6 @@ int main(int argc, char *argv[]) {
     socklen_t addressSize;
     FILE *inputFile;
 
-    // Set up timer
-    struct timeval tv;
-    int rv;
-    fd_set readfds;
-
     if (argc != 5) {
         printf("Usage: %s <port> <ip> <input file> <output file>\n", argv[0]);
         return 1;
@@ -117,12 +126,8 @@ int main(int argc, char *argv[]) {
 
     // Create socket
     socketRef = socket(PF_INET, SOCK_DGRAM, 0);
-    fcntl(socketRef, F_SETFL, O_NONBLOCK);
-    FD_ZERO(&readfds);
-    FD_SET(socketRef, &readfds);
-    tv.tv_sec = 5;
-    tv.tv_usec = 0;
-    sendData(outputFile, strlen(outputFile) + 1, socketRef, serverAddress, addressSize, rv, tv, readfds, 0);
+
+    sendData(outputFile, strlen(outputFile) + 1, socketRef, serverAddress, addressSize, 0);
 
     fseek(inputFile, 0, SEEK_END);
     int fileSize = ftell(inputFile);
@@ -137,7 +142,7 @@ int main(int argc, char *argv[]) {
     }
     printf("\n");
     fclose(inputFile);
-    sendData(data, fileSize, socketRef, serverAddress, addressSize, rv, tv, readfds, 1);
+    sendData(data, fileSize, socketRef, serverAddress, addressSize, 1);
 
     return 0;
 }

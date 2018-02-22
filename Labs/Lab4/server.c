@@ -10,7 +10,7 @@
 #include "useful.h"
 
 int main(int argc, char *argv[]) {
-    char buffer[1024];
+    char buffer[1024000];
     int socketRef, nBytes;
     struct sockaddr_in serverAddress, clientAddress;
     struct sockaddr_storage serverAddressStorage;
@@ -79,7 +79,7 @@ int main(int argc, char *argv[]) {
             printf("\n");
             if (fileDone == 0) {
                 if (recvPacket.data[recvPacket.header.length - 2] == '|') {
-                    fileDone = 1; 
+                    fileDone = 1;
                     fileNameSize += recvPacket.header.length - 2;
                     printf("\nReceived file name\n");
                     printf("File name size: %d\n", fileNameSize);
@@ -87,17 +87,17 @@ int main(int argc, char *argv[]) {
                 } else {
                     fileNameSize += recvPacket.header.length;
                 }
-            }   
+            }
             if (recvPacket.header.length == -1) {
                 break;
-            } else {    
+            } else {
                 PACKET ack = create_ack(sequence);
                 printf("\nSending ACK%d!\n", sequence);
                 sendPacketS2C(ack, socketRef, serverAddressStorage, addressSize);
-                sequence = 1 > sequence ? 1 : 0;   
+                sequence = 1 > sequence ? 1 : 0;
                 if (justFileDone == 1) {
                     sequence = 0;
-                } 
+                }
             }
         }
 

@@ -98,7 +98,7 @@ void sendPacketS2C(PACKET packet, int socket, struct sockaddr_storage address, s
     printf("Sending checksum: %d\n", packet.header.checksum);
     int random = rand() % 101;
         printf("RNG: %d\n", random);
-    if (random <= 25) {
+    if (random <= 5) {
         printf("Packet was not sent!\n");
         return;
     }
