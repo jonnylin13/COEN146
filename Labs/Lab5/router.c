@@ -2,12 +2,12 @@
 #include <stdlib.h>
 #include <pthread.h>
 
-void calculate(void* arg) {
+void *calculate(void *arg) {
 
 }
 
 
-void recv_update(void* arg) {
+void *recv_update(void *arg) {
 
 }
 
@@ -24,13 +24,13 @@ int main(int argc, char* argv[]) {
         printf("Invalid router id\n");
         return 1;
     } 
-    int rid = (int*) argv[1];
+    int rid = *argv[1];
 
     if (scanf("%d%c", argv[2], &term) != 2 || term != '\n') {
         printf("Invalid number of nodes\n");
         return 1;
     }
-    int n_nodes = (int*) argv[2];
+    int n_nodes = *argv[2];
 
     FILE *file1 = fopen(argv[3], "rb");
     FILE *file2 = fopen(argv[4], "rb");
