@@ -11,7 +11,7 @@ typedef struct {
 
 /** Convenience function to return cost at position p[i][j] */
 int get_cost(cost_table *table, int i, int j) {
-    return table->data[i][j];
+    return *table->data[i][j];
 }
 
 // Multi-threaded functions
@@ -67,7 +67,7 @@ int main(int argc, char* argv[]) {
         i++;
         comp = fread(&buff, 1, 1, file1);
     }
-    cost_table ct = {.size = n_nodes, .data = data};
+    cost_table ct = {.size = n_nodes, .data = &data};
 
     printf("cost: %d\n", ct.data[0][0]);
 
