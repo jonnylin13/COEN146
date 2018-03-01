@@ -4,10 +4,10 @@
 
 // Utility
 
-struct cost_table {
+typedef struct cost_table {
     int size;
     int *data[1000][1000];
-}
+};
 
 /** Convenience function to return cost at position p[i][j] */
 int get_cost(cost_table *table, int i, int j) {
