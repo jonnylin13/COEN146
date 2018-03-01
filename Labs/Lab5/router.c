@@ -62,7 +62,7 @@ int main(int argc, char* argv[]) {
         if (buff[0] == '\n') j++; continue;
         if (buff[0] == ' ') continue;
 
-        data[i][j] = buff[0];
+        data[i][j] = *buff[0];
 
         i++;
         comp = fread(&buff, 1, 1, file1);
