@@ -4,10 +4,10 @@
 
 // Utility
 
-typedef struct {
+struct cost_table {
     int size;
     int *data[1000][1000];
-} cost_table;
+}
 
 /** Convenience function to return cost at position p[i][j] */
 int get_cost(cost_table *table, int i, int j) {
@@ -69,7 +69,7 @@ int main(int argc, char* argv[]) {
     }
     cost_table *ct = {.size = n_nodes, .data = data};
 
-    printf("cost: %d\n", ct.data[0][0]);
+    printf("cost: %d\n", ct->data[0][0]);
 
     pthread_t tid;
     pthread_create(&tid, NULL, recv_update, NULL);
