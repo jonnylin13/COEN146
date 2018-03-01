@@ -1,7 +1,8 @@
-// Jonny Lin
-// Lab 3
-// Client
-// Should randomize checksum
+/**
+ * @author Jonathan Lin
+ * Lab 3 Client
+ * File sender using rdt3.0
+ */
 
 #include <stdio.h>
 #include <stdlib.h>

@@ -1,0 +1,83 @@
+Midterm 2 goes up to 6.3
+
+Multiple Access Links
+- point-to-point
+ * PPP for dial up
+ * point-to-point link between host and Ethernet switch
+Broadcast (shared medium)
+- IEEE 802.11 WLAN or WiFi
+
+Ideal MAC Protocol
+given: broadcast channel of rate R bps
+desiderata:
+1) when one node wants to transmitted, sent at rate R
+2) when multiple nodes N, sent at rate R/N
+3) decentralized
+
+MAC protocols:
+- channel partitioning (dividing into time slots, frequency, code)
+- random access
+- taking turns or round robin
+
+Channel partitioning MAC protocols: TDMA (time division multiple access)
+Could also use FDMA (frequency division multiple access)
+- Frequency bands are expensive, so bad when left unused
+
+Random Access Protocols
+- when a node has to send packet, will transmit at full channel data R
+- no a priori coordination
+- 2 or more transmitting nodes -> collision, so we must detect and recover
+- slotted ALOHA, ALOHA, CSMA, CSMA/CD, CSMA/CA
+
+slotted ALOHA (not perfect, not great performance, but the oldest)
+- all frames same size
+- time divided into equal size slots (time to send 1 frame)
+- single active node can trasmit at full rate
+- decentralized
+- but lots of collisions, wasting slots, nodes might take too long to detect
+collision before time to transmit next packet
+- requires clock sync
+- when a collision is detected, it will wait a RANDOM amount of time re-transmitting
+
+suppose: N nodes with many frames to send, each transmits in slot with probability p
+probability that one node will transmit successfully: p(1-p)^(N-1)
+The limit of this probability as N goes to infinity is the max efficiency = 0.37
+~60-70% of the time, collisions are happening
+
+Pure (unslotted) ALOHA
+- unslotted Aloha, simpler, no time sync
+- when frame first arrives, transmit immediately
+- collision probability increases (because all it takes is an overlap in transmissions)
+- overlaps can now approach from the left, or the right
+So.. probability in this case must consider left and right
+Probability that one node will transmit successfully: p(1-p)^2(N-1)
+when N -> inf, max efficiency -> 0.18 (not very good)
+
+CSMA (carrier sense multiple access)
+- listen before transmit
+- if channel senses idle: transmit entire frame
+- if channel senses busy: defer transmission
+(basically don't interrupt others)
+- collisions can still occur in the case that propagation delay interrupts two
+node's communication (listen not recv'd quick enough)
+- collision: entire packet transmission time wasted
+  * distance and propagation delay play role in determining collision probability
+
+CSMA/CD (collision detection)
+- collisions detected within short time
+- colliding transmissions aborted, to reduce wastage
+- Ethernet CDMA/CD algorithm
+ * Implements CSMA/CD, after aborting a transmission and sending jam signal,
+ enters binary exponential backoff:  chooses K = {0, 1, 2, ..., 2^(m-1)} randomly
+ depending on m collisions detected
+ - efficiency approaches 1 as:
+  * propagation time goes to 0
+  * transmission time goes to infinity
+
+ Round robin MAC protocols
+ - try to find a best of both worlds (low waste, low collisions)
+ POLLING (centralized)
+ - master node "invites" slave nodes to transmit in turn
+ TOKEN PASING
+ - control token passed from one node to next
+ - pass the token from node to node

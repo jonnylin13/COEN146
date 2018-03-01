@@ -1,7 +1,8 @@
-// Jonny Lin
-// Lab 3
-// Server
-
+/**
+ * @author Jonathan Lin
+ * Lab 4
+ * File receiver using rdt3.0
+ */
 #include <stdio.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
