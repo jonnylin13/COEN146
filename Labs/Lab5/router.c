@@ -6,7 +6,7 @@
 
 typedef struct {
     int size;
-    int *data[][];
+    int *data[1000][1000];
 } cost_table;
 
 /** Convenience function to return cost at position p[i][j] */
