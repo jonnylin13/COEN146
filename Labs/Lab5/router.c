@@ -2,6 +2,20 @@
 #include <stdlib.h>
 #include <pthread.h>
 
+// Utility
+
+typedef struct {
+    int size;
+    int *data[size][size];
+} cost_table;
+
+/** Convenience function to return cost at position p[i][j] */
+int get_cost(cost_table *table, int i, int j) {
+    return table->data[i][j];
+}
+
+// Multi-threaded functions
+
 void *calculate(void *arg) {
 
 }
@@ -10,6 +24,8 @@ void *calculate(void *arg) {
 void *recv_update(void *arg) {
 
 }
+
+// Entrypoint
 
 int main(int argc, char* argv[]) {
 
@@ -34,6 +50,26 @@ int main(int argc, char* argv[]) {
 
     FILE *file1 = fopen(argv[3], "rb");
     FILE *file2 = fopen(argv[4], "rb");
+
+    // Initialize our tables
+    int cost_a;
+    char buff[1];
+    int *data[n_nodes][n_nodes];
+    int comp = fread(&buff, 1, 1, file1);
+    int i, j = 0;
+    while(comp == 1) {
+
+        if (buff[0] == '\n') j++; continue;
+        if (buff[0] == ' ') continue;
+
+        data[i][j] = buff[0];
+
+        i++;
+        comp = fread(&buff, 1, 1, file1);
+    }
+    cost_table ct = {.size = n_nodes, .data = data};
+
+    printf("cost: %d\n", ct.data[0][0]);
 
     pthread_t tid;
     pthread_create(&tid, NULL, recv_update, NULL);
