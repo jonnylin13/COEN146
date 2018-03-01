@@ -2,12 +2,12 @@
 #include <stdlib.h>
 #include <pthread.h>
 
-void calculate() {
+void calculate(void* arg) {
 
 }
 
 
-void recv_update() {
+void recv_update(void* arg) {
 
 }
 
@@ -36,8 +36,8 @@ int main(int argc, char* argv[]) {
     FILE *file2 = fopen(argv[4], "rb");
 
     pthread_t tid;
-    pthread_create(&tid, NULL, recv_update);
-    pthread_create(&tid, NULL, calculate);
+    pthread_create(&tid, NULL, recv_update, NULL);
+    pthread_create(&tid, NULL, calculate, NULL);
 
     // Command listener
     int done = 0;
