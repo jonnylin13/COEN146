@@ -13,3 +13,9 @@
 * File reader and writer over UDP
 * Implements rdt2.2
 * Client sends file and output file name to server
+
+## Lab 4
+* I forget what it does (rdt3.0?)
+
+## Lab 5
+* The rest is on my desktop
